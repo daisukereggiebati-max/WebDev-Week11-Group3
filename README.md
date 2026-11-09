@@ -133,6 +133,6 @@ Through this assessment, we learned how to systematically diagnose, measure, and
 
 ## 8. Git Repository Information
 
-- **Repository URL:** [webdev-week11-Austria-Bati-Caraig](https://github.com/daisukereggiebati-max/Repository-name-webdev-week11-Austria-Bati-Caraig.git)
+- **Repository URL:** [WebDev-Week11-Group3](https://github.com/daisukereggiebati-max/WebDev-Week11-Group3)
 - **Branch:** `main`
 - **Submission Document:** `WebDev-Week11-Assessment-Caraig_Austria_Bati.pdf`
