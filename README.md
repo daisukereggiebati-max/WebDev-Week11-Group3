@@ -27,8 +27,8 @@ Our optimized implementation uses eager loading and `withCount()` to retrieve th
 
 | Implementation | Query Count |
 |---|---|
-| Naive implementation | [Insert actual count] |
-| Optimized implementation | [Insert actual count] |
+| Naive implementation (`/events/naive`) | 101 queries (1 for events + 50 for venues + 50 for participants) |
+| Optimized implementation (`/events`) | 2 queries (1 for events with participants count subquery + 1 eager loaded for venues) |
 
 **Explanation:**
 
@@ -40,15 +40,15 @@ Based on our comparison, we can understand how eager loading helps reduce unnece
 
 ### Query Plan Comparison
 
-| Query | Index | Plan Type | Execution Time |
-|---|---|---|---|
-| JSONB arrow | No index | [Actual plan] | [Actual time] |
-| JSONB arrow | Expression B-tree | [Actual plan] | [Actual time] |
-| JSONB containment | No index | [Actual plan] | [Actual time] |
-| JSONB containment | GIN JSONB | [Actual plan] | [Actual time] |
-| Full-text search | No index | [Actual plan] | [Actual time] |
-| Full-text search | GIN Full-text | [Actual plan] | [Actual time] |
-| JSONB arrow | GIN containment only | [Actual plan] | [Actual time] |
+| Query | Index | Plan Type | Execution Time | Planning Time |
+|---|---|---|---|---|
+| JSONB arrow (`details->>'dress_code' = 'ultraviolet'`) | No index | Seq Scan on events | 7.252 ms | 2.118 ms |
+| JSONB arrow (`details->>'dress_code' = 'ultraviolet'`) | Expression B-tree (`events_dress_code_idx`) | Index Scan using events_dress_code_idx | 0.234 ms | 7.907 ms |
+| JSONB containment (`details @> '{"dress_code": "ultraviolet"}'`) | No index | Seq Scan on events | 8.082 ms | 0.225 ms |
+| JSONB containment (`details @> '{"dress_code": "ultraviolet"}'`) | GIN JSONB (`events_details_gin_idx`) | Bitmap Heap Scan using events_details_gin_idx | 41.784 ms | 0.655 ms |
+| Full-text search (`description @@ to_tsquery('solstice')`) | No index | Seq Scan on events | 425.331 ms | 0.274 ms |
+| Full-text search (`description @@ to_tsquery('solstice')`) | GIN Full-text (`events_description_fts_idx`) | Bitmap Heap Scan using events_description_fts_idx | 0.157 ms | 23.045 ms |
+| JSONB arrow (`details->>'dress_code' = 'ultraviolet'`) | GIN containment only (Unused Index) | Seq Scan on events (Index Ignored) | 11.598 ms | 2.981 ms |
 
 ### Explanation of Indexes
 
